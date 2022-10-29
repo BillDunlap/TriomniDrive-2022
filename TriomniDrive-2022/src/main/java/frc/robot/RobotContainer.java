@@ -43,6 +43,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return new RunWheel(m_ow, 5.0, 1.0);
+    return new RunWheel(m_ow, 3.0, 0.25);
   }
 }
