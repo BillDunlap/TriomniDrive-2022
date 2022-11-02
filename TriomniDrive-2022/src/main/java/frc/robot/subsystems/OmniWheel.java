@@ -23,10 +23,11 @@ public class OmniWheel extends SubsystemBase {
   // 0 means stopped.
   public void setPercent(double percent) {
     this.percent = percent;
+    talonsrx.set(ControlMode.PercentOutput,percent);
   }
 
   @Override
   public void periodic() {
-    talonsrx.set(ControlMode.PercentOutput,percent);
+
   }
 }

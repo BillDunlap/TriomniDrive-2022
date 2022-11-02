@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;// HID stands for Human interface device.
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.RunWheel;
 import frc.robot.subsystems.OmniWheel;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +27,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
+    // m_ow.setDefaultCommand(new RunViaJoystick());
   }
 
   /**
@@ -34,7 +36,11 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    XboxController joystick= new XboxController (0);
+    JoystickButton xButton= new JoystickButton(joystick,XboxController.Button.kX.value);
+    xButton.whenPressed(new RunWheel(m_ow,2.0,0.5));
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -43,6 +49,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return new RunWheel(m_ow, 3.0, 0.25);
+    return new RunWheel(m_ow, 5.0, 0.75);
   }
 }
