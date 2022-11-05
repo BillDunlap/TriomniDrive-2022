@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;// HID stands for Human interface device.
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.DefaultOmniWheel;
 import frc.robot.commands.RunWheel;
 import frc.robot.subsystems.OmniWheel;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,13 +21,14 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final OmniWheel m_ow = new OmniWheel(new TalonSRX(1));
-
   private final RunWheel m_rw = new RunWheel(m_ow, 1.0, 5.0);
-
+  private final XboxController m_joy = new XboxController(0);
+  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
+    m_ow.setDefaultCommand(new DefaultOmniWheel(m_joy, m_ow));
     // m_ow.setDefaultCommand(new RunViaJoystick());
   }
 
@@ -37,9 +39,9 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    XboxController joystick= new XboxController (0);
-    JoystickButton xButton= new JoystickButton(joystick,XboxController.Button.kX.value);
-    xButton.whenPressed(new RunWheel(m_ow,2.0,0.5));
+    
+    JoystickButton xButton = new JoystickButton(m_joy,XboxController.Button.kX.value);
+    xButton.whenPressed(new RunWheel(m_ow,2.0,0.25));
   }
 
   /**
