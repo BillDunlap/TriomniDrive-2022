@@ -7,11 +7,15 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;// HID stands for Human interface device.
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.DefaultOmniWheel;
-import frc.robot.commands.RunWheel;
-import frc.robot.subsystems.OmniWheel;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+// import frc.robot.commands.DefaultOmniWheel;
+// import frc.robot.commands.RunWheel;
+import frc.robot.commands.SpinUsingJoystick;
+import frc.robot.commands.Spin;
+// import frc.robot.subsystems.OmniWheel;
+import frc.robot.subsystems.DriveTrain;
 import edu.wpi.first.wpilibj2.command.Command;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+// import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -20,15 +24,17 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final OmniWheel m_ow = new OmniWheel(new TalonSRX(1));
-  private final RunWheel m_rw = new RunWheel(m_ow, 1.0, 5.0);
-  private final XboxController m_joy = new XboxController(0);
+  // private final OmniWheel m_ow = new OmniWheel(new TalonSRX(3), "default"); // the 2 was 1 -> this change does change motor controller lights
+  // private final RunWheel m_rw = new RunWheel(m_ow, -0.5, 5.0); // the -0.5 was 1.0
+  private final XboxController m_controller = new XboxController(0);
+  private final DriveTrain m_driveTrain = new DriveTrain();
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    SmartDashboard.putData(m_driveTrain); // show on Shuffleboard which command is using subsystem m_ow
     // Configure the button bindings
     configureButtonBindings();
-    m_ow.setDefaultCommand(new DefaultOmniWheel(m_joy, m_ow));
+    m_driveTrain.setDefaultCommand(new SpinUsingJoystick(m_driveTrain, m_controller));
     // m_ow.setDefaultCommand(new RunViaJoystick());
   }
 
@@ -39,9 +45,12 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    
-    JoystickButton xButton = new JoystickButton(m_joy,XboxController.Button.kX.value);
-    xButton.whenPressed(new RunWheel(m_ow,2.0,0.25));
+    // pressing left bumper will make it spin slowly clockwise until button is released
+    JoystickButton leftBumperButton = new JoystickButton(m_controller,XboxController.Button.kLeftBumper.value);
+    leftBumperButton.whenPressed(new Spin(m_driveTrain, 0.2).until(() -> !leftBumperButton.get()));
+    // right bumper causes counterclockwise spin until released
+    JoystickButton rightBumperButton = new JoystickButton(m_controller,XboxController.Button.kRightBumper.value);
+    rightBumperButton.whenPressed(new Spin(m_driveTrain, -0.2).until(() -> !rightBumperButton.get()));
   }
 
   /**
@@ -50,7 +59,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
-    return new RunWheel(m_ow, 5.0, 0.75);
+    // very slowly spin for 5 seconds
+    return new Spin(m_driveTrain, 0.1).withTimeout(5.0);
   }
 }
