@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXPIDSetConfiguration;
 public class OmniWheel extends SubsystemBase {
@@ -22,7 +23,9 @@ public class OmniWheel extends SubsystemBase {
     m_talonsrx = new TalonSRX(canId);
     m_fractionPower = 0;
     m_name = name;
+    m_talonsrx.configFactoryDefault();
     m_talonsrx.clearStickyFaults();
+    m_talonsrx.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
     SmartDashboard.putNumber("Omniwheel power" + "(" + m_name + ")", m_fractionPower);
   }
  
@@ -38,6 +41,7 @@ public class OmniWheel extends SubsystemBase {
 
   @Override
   public void periodic() {
-
+    double v = m_talonsrx.getSelectedSensorVelocity();
+    SmartDashboard.putNumber("Velocity" + "(" + m_name + ")", v);
   }
 }

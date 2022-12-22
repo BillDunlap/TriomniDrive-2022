@@ -9,11 +9,15 @@ import frc.robot.subsystems.DriveTrain;
 
 public class Spin extends CommandBase {
   private final DriveTrain m_driveTrain;
-  private double m_percent;
-  /** Creates a new Spin. */
-  public Spin(DriveTrain driveTrain, double percent) {
+  private double m_fractionPower;
+  /** Creates a new Spin.
+   * @param driveTrain: the drivetrain consisting of 3 omniwheels
+   * @param fractionPower: how much power to put into the spin, positive for
+   *        clockwise, negative counter-clockwise.
+   */
+  public Spin(DriveTrain driveTrain, double fractionPower) {
     // Use addRequirements() here to declare subsystem dependencies.
-    m_percent = percent;
+    m_fractionPower = fractionPower;
     m_driveTrain = driveTrain;
     addRequirements(m_driveTrain);
   }
@@ -21,7 +25,7 @@ public class Spin extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_driveTrain.setFractionPower(m_percent, m_percent, m_percent);
+    m_driveTrain.spinFractionPower(m_fractionPower);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -31,7 +35,7 @@ public class Spin extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_driveTrain.setFractionPower(0.0, 0.0, 0.0);
+    m_driveTrain.beStill();;
   }
 
   // We expect this command to be decorated with withTimeout() or until()

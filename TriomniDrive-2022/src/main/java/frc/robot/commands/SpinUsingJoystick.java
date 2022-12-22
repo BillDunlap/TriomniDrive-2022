@@ -22,20 +22,20 @@ public class SpinUsingJoystick extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_driveTrain.setFractionPower(0.0, 0.0, 0.0);
+    m_driveTrain.beStill();;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     double y = m_controller.getLeftY();
-    m_driveTrain.setFractionPower(y, y, y);
+    m_driveTrain.spinFractionPower(y);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_driveTrain.setFractionPower(0.0, 0.0, 0.0);
+    m_driveTrain.beStill();;
   }
 
   // This is expected to default method for DriveTrain objects, so it never finishes

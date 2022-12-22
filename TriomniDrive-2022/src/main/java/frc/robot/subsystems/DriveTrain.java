@@ -26,6 +26,18 @@ public class DriveTrain extends SubsystemBase {
     m_left.setFractionPower(fLeft);
   }
 
+  /** spin robot using same power to all omniwheels
+   *  @param fractionPower: number in [-1,1] saying what fraction of maximum power
+   * to give each wheel.  Positive for clockwise, negative counterclockwise.
+   */
+  public void spinFractionPower(double fractionPower) {
+    setFractionPower(fractionPower, fractionPower, fractionPower);
+  }
+
+  public void beStill() {
+    setFractionPower(0.0, 0.0, 0.0);
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
