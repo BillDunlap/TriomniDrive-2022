@@ -11,11 +11,17 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 // import frc.robot.commands.DefaultOmniWheel;
 // import frc.robot.commands.RunWheel;
 import frc.robot.commands.SpinUsingJoystick;
+import frc.robot.commands.GoStraight;
+import frc.robot.commands.RumbleController;
 import frc.robot.commands.Spin;
+import frc.robot.commands.SpinNativeUnits;
+import frc.robot.subsystems.ControllerRumbler;
 // import frc.robot.subsystems.OmniWheel;
 import frc.robot.subsystems.DriveTrain;
 import edu.wpi.first.wpilibj2.command.Command;
-// import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.kauailabs.navx.frc.AHRS; // for NaxX
+import edu.wpi.first.wpilibj.SPI; // for MXP port on top of Roborio (that NavX is attached to)
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -27,15 +33,15 @@ public class RobotContainer {
   // private final OmniWheel m_ow = new OmniWheel(new TalonSRX(3), "default"); // the 2 was 1 -> this change does change motor controller lights
   // private final RunWheel m_rw = new RunWheel(m_ow, -0.5, 5.0); // the -0.5 was 1.0
   private final XboxController m_controller = new XboxController(0);
+  public final ControllerRumbler m_rumbler = new ControllerRumbler(m_controller);
   private final DriveTrain m_driveTrain = new DriveTrain();
+  public static final AHRS ahrs = new AHRS(SPI.Port.kMXP); 
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    SmartDashboard.putData(m_driveTrain); // show on Shuffleboard which command is using subsystem m_ow
-    // Configure the button bindings
+    SmartDashboard.putData(m_driveTrain); // show commands controlling the drive train
     configureButtonBindings();
     m_driveTrain.setDefaultCommand(new SpinUsingJoystick(m_driveTrain, m_controller));
-    // m_ow.setDefaultCommand(new RunViaJoystick());
   }
 
   /**
@@ -47,10 +53,18 @@ public class RobotContainer {
   private void configureButtonBindings() {
     // pressing left bumper will make it spin slowly clockwise until button is released
     JoystickButton leftBumperButton = new JoystickButton(m_controller,XboxController.Button.kLeftBumper.value);
-    leftBumperButton.whenPressed(new Spin(m_driveTrain, 0.2).until(() -> !leftBumperButton.get()));
+    leftBumperButton.whenPressed(new SpinNativeUnits(m_driveTrain, 200).until(() -> !leftBumperButton.get()));
     // right bumper causes counterclockwise spin until released
     JoystickButton rightBumperButton = new JoystickButton(m_controller,XboxController.Button.kRightBumper.value);
-    rightBumperButton.whenPressed(new Spin(m_driveTrain, -0.2).until(() -> !rightBumperButton.get()));
+    rightBumperButton.whenPressed(new SpinNativeUnits(m_driveTrain, -150).until(() -> !rightBumperButton.get()));
+    // Y button makes robot go forward at 1.5 feet/second, until button is released
+    JoystickButton yButton = new JoystickButton(m_controller, XboxController.Button.kY.value);
+    yButton.whenPressed(new GoStraight(m_driveTrain, 1.5, 0.0).until(() -> !yButton.get()));
+    // A button makes robot go left at 1.3 feet/second, until button is released
+    JoystickButton aButton = new JoystickButton(m_controller, XboxController.Button.kA.value);
+    aButton.whenPressed(new GoStraight(m_driveTrain, 1.3, -90.).until(() -> !aButton.get()));
+    JoystickButton backButton = new JoystickButton(m_controller, XboxController.Button.kBack.value);
+    backButton.whenPressed(new RumbleController(m_rumbler, 1.0, 1.0).withTimeout(3.0));
   }
 
   /**
@@ -60,6 +74,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // very slowly spin for 5 seconds
-    return new Spin(m_driveTrain, 0.1).withTimeout(5.0);
+    return new Spin(m_driveTrain, 0.4).withTimeout(5.0);
   }
 }

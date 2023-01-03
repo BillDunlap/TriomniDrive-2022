@@ -7,24 +7,23 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveTrain;
 
-public class Spin extends CommandBase {
-  private final DriveTrain m_driveTrain;
-  private double m_fractionPower;
-  /** Creates a new Spin.
-   * @param driveTrain: the drivetrain consisting of 3 omniwheels
-   * @param fractionPower: how much power to put into the spin, positive for
-   *        clockwise, negative counter-clockwise.
+public class SpinNativeUnits extends CommandBase {
+  DriveTrain m_driveTrain;
+  double m_velocity;
+  /** Creates a new SpinNativeUnits.
+   * @param driveTrain: an OmniWheel drivetrain
+   * @param velocity: velocity in native units (ticks per 100 milliseconds)
    */
-  public Spin(DriveTrain driveTrain, double fractionPower) {
-    m_fractionPower = fractionPower;
+  public SpinNativeUnits(DriveTrain driveTrain, double velocity) {
     m_driveTrain = driveTrain;
+    m_velocity = velocity;
     addRequirements(m_driveTrain);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_driveTrain.spinFractionPower(m_fractionPower);
+    m_driveTrain.spinNativeUnits(m_velocity);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -34,12 +33,12 @@ public class Spin extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_driveTrain.beStill();;
+    m_driveTrain.beStill();
   }
 
-  // We expect this command to be decorated with withTimeout() or until()
+  // The command never ends: decorate it with withTimeout() or until(predicate function)
   @Override
   public boolean isFinished() {
-    return false; // we expect user will add a decorator for a timeout or wait until button is released
+    return false;
   }
 }
