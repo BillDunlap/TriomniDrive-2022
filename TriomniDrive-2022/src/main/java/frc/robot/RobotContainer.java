@@ -5,16 +5,18 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;// HID stands for Human interface device.
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 // import frc.robot.commands.DefaultOmniWheel;
 // import frc.robot.commands.RunWheel;
-import frc.robot.commands.SpinUsingJoystick;
+// import frc.robot.commands.SpinUsingJoystick;
+import frc.robot.commands.DefaultTeleop;
 import frc.robot.commands.GoStraight;
 import frc.robot.commands.RumbleController;
 import frc.robot.commands.Spin;
-import frc.robot.commands.SpinNativeUnits;
+import frc.robot.commands.SpinDegreesPerSecond;
 import frc.robot.subsystems.ControllerRumbler;
 // import frc.robot.subsystems.OmniWheel;
 import frc.robot.subsystems.DriveTrain;
@@ -33,15 +35,21 @@ public class RobotContainer {
   // private final OmniWheel m_ow = new OmniWheel(new TalonSRX(3), "default"); // the 2 was 1 -> this change does change motor controller lights
   // private final RunWheel m_rw = new RunWheel(m_ow, -0.5, 5.0); // the -0.5 was 1.0
   private final XboxController m_controller = new XboxController(0);
-  public final ControllerRumbler m_rumbler = new ControllerRumbler(m_controller);
+  private final ControllerRumbler m_rumbler = new ControllerRumbler(m_controller);
   private final DriveTrain m_driveTrain = new DriveTrain();
-  public static final AHRS ahrs = new AHRS(SPI.Port.kMXP); 
+  public static final AHRS ahrs = new AHRS(SPI.Port.kMXP); // public only so that Robotic.periodic() can send its value to shuffleboard
+
+  private static double m_spinRate = 20; // default spin rate in degrees per second
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    if (!Preferences.containsKey("spinRate")) { // might be better done in robotInit
+      Preferences.setDouble("spinRate", m_spinRate);
+    }
     SmartDashboard.putData(m_driveTrain); // show commands controlling the drive train
     configureButtonBindings();
-    m_driveTrain.setDefaultCommand(new SpinUsingJoystick(m_driveTrain, m_controller));
+    //m_driveTrain.setDefaultCommand(new SpinUsingJoystick(m_driveTrain, m_controller));
+    m_driveTrain.setDefaultCommand(new DefaultTeleop(m_driveTrain, m_controller, m_rumbler));
   }
 
   /**
@@ -52,11 +60,12 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // pressing left bumper will make it spin slowly clockwise until button is released
+    m_spinRate = Preferences.getDouble("spinRate", m_spinRate);
     JoystickButton leftBumperButton = new JoystickButton(m_controller,XboxController.Button.kLeftBumper.value);
-    leftBumperButton.whenPressed(new SpinNativeUnits(m_driveTrain, 200).until(() -> !leftBumperButton.get()));
+    leftBumperButton.whenPressed(new SpinDegreesPerSecond(m_driveTrain, -m_spinRate).until(() -> !leftBumperButton.get()));
     // right bumper causes counterclockwise spin until released
     JoystickButton rightBumperButton = new JoystickButton(m_controller,XboxController.Button.kRightBumper.value);
-    rightBumperButton.whenPressed(new SpinNativeUnits(m_driveTrain, -150).until(() -> !rightBumperButton.get()));
+    rightBumperButton.whenPressed(new SpinDegreesPerSecond(m_driveTrain, m_spinRate).until(() -> !rightBumperButton.get()));
     // Y button makes robot go forward at 1.5 feet/second, until button is released
     JoystickButton yButton = new JoystickButton(m_controller, XboxController.Button.kY.value);
     yButton.whenPressed(new GoStraight(m_driveTrain, 1.5, 0.0).until(() -> !yButton.get()));

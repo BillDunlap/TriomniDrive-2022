@@ -23,41 +23,72 @@ public class DriveTrain extends SubsystemBase {
     beStill();
   }
 
-  public void setFractionPower(double front, double right, double left){
+  public void setMotorsFractionPower(double front, double right, double left){
     m_front.setFractionPower(front);
     m_right.setFractionPower(right);
     m_left.setFractionPower(left);
   }
 
-  public void setVelocityNativeUnits(double front, double right, double left) {
+  /**
+   * Set velocities of the motors in clicks per 100 ms.
+   * @param front: velocity of front motor
+   * @param right: velocity of right motor
+   * @param left: velocity of left motor
+   */
+  public void setMotorVelocitiesNativeUnits(double front, double right, double left) {
     m_front.setVelocityNativeUnits(front);
     m_right.setVelocityNativeUnits(right);
     m_left.setVelocityNativeUnits(left);
   }
 
+  public void setWheelVelocitiesFps(double frontFeetPerSecond, double rightFeetPerSecond, double leftFeetPerSecond){
+    m_front.setVelocityFeetPerSecond(frontFeetPerSecond);
+    m_right.setVelocityFeetPerSecond(rightFeetPerSecond);
+    m_left.setVelocityFeetPerSecond(leftFeetPerSecond); 
+  }
+
   /** spin robot using same power to all omniwheels
    *  @param fractionPower: number in [-1,1] saying what fraction of maximum power
    * to give each wheel.  Positive for clockwise, negative counterclockwise.
+   * Useful for testing, but not recommended for general use.
    */
   public void spinFractionPower(double fractionPower) {
-    setFractionPower(fractionPower, fractionPower, fractionPower);
+    setMotorsFractionPower(fractionPower, fractionPower, fractionPower);
   }
 
+  /**
+   * 
+   * @param velocity: turn all wheels at this many clicks per 100 ms.
+   *   This is useful for testing, but not recommended for general use.
+   */
   public void spinNativeUnits(double velocity) {
-    setVelocityNativeUnits(velocity, velocity, velocity);
+    setMotorVelocitiesNativeUnits(velocity, velocity, velocity);
+  }
+
+  /**
+   * 
+   * @param degreesPerSecond: the robot itself (not a wheel) should turn this many degrees per second.
+   * Positive degrees means clockwise, negative counterclockwise
+   */
+  public void spinDegreesPerSecond(double degreesPerSecond){
+    double wheelVelocityFeetPerSecond = 2.0 * Math.PI * Constants.kCenterToWheelFt / 360. * degreesPerSecond;
+    setWheelVelocitiesFps(wheelVelocityFeetPerSecond, wheelVelocityFeetPerSecond, wheelVelocityFeetPerSecond);
   }
 
   public void beStill() {
-    setFractionPower(0.0, 0.0, 0.0);
+    setMotorsFractionPower(0.0, 0.0, 0.0);
   }
 
+  /**
+   * Make robot travel in a straight line
+   * @param feetPerSecond: desired robot speed
+   * @param radians: direction of travel in radians counterclockwise from straight ahead
+   */
   public void setVelocityFpsRadians(double feetPerSecond, double radians){
-    double front_feetPerSecond = feetPerSecond * Math.cos( radians - 9./6. * Math.PI);
-    double right_feetPerSecond = feetPerSecond * Math.cos( radians - 5./6. * Math.PI);
-    double left_feetPerSecond = feetPerSecond * Math.cos( radians - 1./6. * Math.PI);
-    m_front.setVelocityFeetPerSecond(front_feetPerSecond);
-    m_right.setVelocityFeetPerSecond(right_feetPerSecond);
-    m_left.setVelocityFeetPerSecond(left_feetPerSecond); 
+    double frontFeetPerSecond = feetPerSecond * Math.cos( radians - 9./6. * Math.PI);
+    double rightFeetPerSecond = feetPerSecond * Math.cos( radians - 5./6. * Math.PI);
+    double leftFeetPerSecond = feetPerSecond * Math.cos( radians - 1./6. * Math.PI);
+    setWheelVelocitiesFps(frontFeetPerSecond, rightFeetPerSecond, leftFeetPerSecond);
   }
 
   public void setVelocityFpsDegrees(double feetPerSecond, double degrees){

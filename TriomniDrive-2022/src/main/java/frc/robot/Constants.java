@@ -27,4 +27,8 @@ public final class Constants {
      * @param kWheelDiameterFt: diameter of drive wheels in feet.
      */
     public static final double kWheelDiameterFt = 8.0 / 12.0; // 8 inch omniwheels
+    /**
+     * @param kCenterToWheelFt: horizontal distance from center of robot to each wheel 
+     */
+    public static final double kCenterToWheelFt = 18.0 / 12.0; // 18 inches
 }
