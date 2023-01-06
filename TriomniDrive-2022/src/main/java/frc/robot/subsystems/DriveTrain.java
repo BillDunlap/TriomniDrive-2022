@@ -31,6 +31,20 @@ public class DriveTrain extends SubsystemBase {
   }
 
   public void setZeroAngleDegrees(double degrees) {
+    int nTries = 1;
+    while (m_ahrs.isCalibrating()) { //wait to zero yaw if calibration is still running
+      try {
+        Thread.sleep(20);
+        System.out.println("----calibrating gyro---- " + nTries);
+      } catch (InterruptedException e) {
+
+      }
+      nTries++;
+      if (nTries >= 50 && nTries%10==0) {
+        System.out.println("Having trouble calibrating NavX");
+      }
+    }
+    System.out.println("Setting angle adj to " + (-m_ahrs.getYaw()) + " + " + degrees + " after " + nTries + " attempts");
     m_ahrs.setAngleAdjustment(-m_ahrs.getYaw() + degrees);
   }
 

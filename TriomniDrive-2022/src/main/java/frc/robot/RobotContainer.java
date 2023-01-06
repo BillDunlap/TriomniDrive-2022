@@ -8,16 +8,12 @@ import edu.wpi.first.wpilibj.GenericHID;// HID stands for Human interface device
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-// import frc.robot.commands.DefaultOmniWheel;
-// import frc.robot.commands.RunWheel;
-// import frc.robot.commands.SpinUsingJoystick;
 import frc.robot.commands.DefaultTeleop;
 import frc.robot.commands.GoStraight;
 import frc.robot.commands.RumbleController;
 import frc.robot.commands.SetForwardToTowardsFront;
 import frc.robot.commands.Spin;
 import frc.robot.subsystems.ControllerRumbler;
-// import frc.robot.subsystems.OmniWheel;
 import frc.robot.subsystems.DriveTrain;
 import edu.wpi.first.wpilibj2.command.Command;
 

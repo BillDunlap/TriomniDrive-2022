@@ -19,7 +19,7 @@ public class DefaultTeleop extends CommandBase {
   private double defaultSpinRate_DegreesPerSecond;
   private double defaultTravelRate_FeetPerSecond;
   
-  /** Creates a new SpinUsingJoystick. */
+  /** Creates a new DefaultTeleop. */
   public DefaultTeleop(DriveTrain driveTrain, XboxController controller, ControllerRumbler controllerRumbler) {
     m_driveTrain = driveTrain;
     m_controller = controller;
@@ -33,7 +33,7 @@ public class DefaultTeleop extends CommandBase {
   public void initialize() {
     m_driveTrain.beStill();
     m_controllerRumbler.beQuiet();
-    m_driveTrain.setZeroAngleDegrees(0.0); // does initialize() get called just once for a default command?
+    // m_driveTrain.setZeroAngleDegrees(0.0); // does initialize() get called just once for a default command?
     defaultSpinRate_DegreesPerSecond = TuningVariables.defaultSpinRate_DegreesPerSecond.get();
     defaultTravelRate_FeetPerSecond = TuningVariables.defaultTravelRate_FeetPerSecond.get();
   }
