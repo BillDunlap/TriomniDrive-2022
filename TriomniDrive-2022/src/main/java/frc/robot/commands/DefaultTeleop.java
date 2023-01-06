@@ -5,15 +5,19 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.TuningVariables;
 import frc.robot.subsystems.ControllerRumbler;
 import frc.robot.subsystems.DriveTrain;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class DefaultTeleop extends CommandBase {
   /** Creates a new DefaultTeleop. */
   private final DriveTrain m_driveTrain;
   private final XboxController m_controller;
   private final ControllerRumbler m_controllerRumbler;
+  private double defaultSpinRate_DegreesPerSecond;
+  private double defaultTravelRate_FeetPerSecond;
   
   /** Creates a new SpinUsingJoystick. */
   public DefaultTeleop(DriveTrain driveTrain, XboxController controller, ControllerRumbler controllerRumbler) {
@@ -29,37 +33,41 @@ public class DefaultTeleop extends CommandBase {
   public void initialize() {
     m_driveTrain.beStill();
     m_controllerRumbler.beQuiet();
+    m_driveTrain.setZeroAngleDegrees(0.0); // does initialize() get called just once for a default command?
+    defaultSpinRate_DegreesPerSecond = TuningVariables.defaultSpinRate_DegreesPerSecond.get();
+    defaultTravelRate_FeetPerSecond = TuningVariables.defaultTravelRate_FeetPerSecond.get();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // TODO: turn off rumbler if not too fast
     double z;
     boolean rumbleNeeded = false;
-    if ((z = m_controller.getLeftTriggerAxis()) > 0.0) {
+    if ((z = m_controller.getLeftTriggerAxis()) > 0.0) { // z is in [0,1]
       rumbleNeeded = z > .90;
-      m_driveTrain.spinDegreesPerSecond(-z * 90.0); // I think z is in [-1,1]
+      m_driveTrain.spinDegreesPerSecond(-z * 90.0);
     } else if ((z = m_controller.getRightTriggerAxis()) > 0.0) {
       rumbleNeeded = z > 0.90;
       m_driveTrain.spinDegreesPerSecond(+z * 90.0);
     } else if (m_controller.getLeftBumper()) {
-      m_driveTrain.spinDegreesPerSecond(-40.0); // -> -TuningVariables.m_spinRate
+      m_driveTrain.spinDegreesPerSecond(-defaultSpinRate_DegreesPerSecond);
     } else if (m_controller.getRightBumper()) {
-      m_driveTrain.spinDegreesPerSecond(+40.0); // -> +TuningVariables.m_spinRate
-    } else if ((z = m_controller.getPOV()) != -1) {
-      m_driveTrain.setVelocityFpsDegrees(2.0, z); // -> TuningVariables.m_fps
+      m_driveTrain.spinDegreesPerSecond(+defaultSpinRate_DegreesPerSecond);
+    } else if ((z = m_controller.getPOV()) != -1) { // if POV button is pressed, z is multiple of 45 degrees, if not pressed then -1
+      m_driveTrain.setVelocityFpsDegrees_FieldOriented(defaultTravelRate_FeetPerSecond, z);
     } else { // if nothing else pressed, go according to left joystick
       double x = m_controller.getLeftX();
       double y = m_controller.getLeftY();
-      if (x == 0.0 && y == 0.0) {
+      SmartDashboard.putNumber("Left X", x);
+      SmartDashboard.putNumber("Left y", y);
+      if (Math.abs(x) <= 0.025 && Math.abs(y) <= 0.025) {
         m_driveTrain.beStill();
         m_controllerRumbler.beQuiet();
       } else {
         double radians = Math.atan2(-y, x) - Math.PI/2 ;
-        double fps = Math.hypot(x, y) * 4.0 ; // 4 ft/s is easy walking speed
+        double fps = Math.min(Math.hypot(x, y), 1.0) * 4.0 ; // 4 ft/s is easy walking speed
         rumbleNeeded = fps >= 4.0;
-        m_driveTrain.setVelocityFpsRadians(fps, radians);
+        m_driveTrain.setVelocityFpsDegrees_FieldOriented(fps, -radians / Math.PI * 180);
       }
     }
     if (rumbleNeeded) {

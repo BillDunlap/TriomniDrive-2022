@@ -4,23 +4,34 @@
 
 package frc.robot.subsystems;
 
+import com.kauailabs.navx.frc.AHRS;
+
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // import frc.robot.subsystems.OmniWheel; // no need to import class in same directory
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
 
 public class DriveTrain extends SubsystemBase {
   private final OmniWheel m_front;
   private final OmniWheel m_right;
   private final OmniWheel m_left;
+  private final AHRS m_ahrs;
 
   /** Creates a new DriveTrain. */
   public DriveTrain() {
     m_front = new OmniWheel(1, "front", Constants.kWheelDiameterFt);
     m_right = new OmniWheel(2, "right", Constants.kWheelDiameterFt);
     m_left = new OmniWheel(3, "left", Constants.kWheelDiameterFt);
+    m_ahrs = new AHRS(SPI.Port.kMXP);
+    // The AHRS has not settled down on an angle yet when
+    // the constructor for drive train is called.
+    setZeroAngleDegrees(0.0); // assume 'front' wheel points 'ahead'
     beStill();
+  }
+
+  public void setZeroAngleDegrees(double degrees) {
+    m_ahrs.setAngleAdjustment(-m_ahrs.getYaw() + degrees);
   }
 
   public void setMotorsFractionPower(double front, double right, double left){
@@ -95,10 +106,16 @@ public class DriveTrain extends SubsystemBase {
     setVelocityFpsRadians(feetPerSecond, -degrees / 180. * Math.PI);
   }
 
+  public void setVelocityFpsDegrees_FieldOriented(double feetPerSecond, double degrees){
+    double orientationDegrees = m_ahrs.getAngle();
+    setVelocityFpsDegrees(feetPerSecond, degrees - orientationDegrees);
+  }
+
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    double angle = RobotContainer.ahrs.getAngle();
+    double angle = m_ahrs.getAngle();
     SmartDashboard.putNumber("Angle", angle);
   }
 }
