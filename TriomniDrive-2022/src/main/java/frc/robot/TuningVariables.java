@@ -5,14 +5,16 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Preferences;
 
-/** These things are like variables in Constants,
+/** These things are like the variables in Constants,
  * but can be set via the Preferences class (e.g.,
- * via Shuffleboard) and will be stored in flash
- * memory on the roborio.  The Preferences class
- * stores values in flash (persistent) memory on
- * the Roborio.  The TuningVariables class also
- * stores default values in Java (nonpersistent)
+ * via Shuffleboard) and so will be stored in [persistent]
+ * flash memory on the roborio.  The TuningVariables class
+ * also stores default values in Java (nonpersistent)
  * memory.
+ * 
+ * To add a new variable, say newVar, with default value newVarDefault,
+ * to this scheme, add newVar(newVarDefault) to the comma-separated
+ * list at the start of the enum below.
  * 
  * To get a tuning variable's value use the syntax
  *   TuningVariables.variableName.get()
@@ -38,28 +40,32 @@ public enum TuningVariables {
           Preferences.setDouble(name(), m_defaultValue);
         }
     }
-    
+    /** From flash memory, get the value of this variable */
     public double get() {
         return Preferences.getDouble(name(), m_defaultValue);
     }
+    /** In flash memory, set this variable to a value */
     void set(double value) {
         Preferences.setDouble(name(), value);
     }
+    /** In flash memory, set this variable to its default value */
     void setToDefaultValue() {
         set(m_defaultValue);
     }
+    /** In flash memory, set all variables to their default values */
     static void setAllToDefaultValues() {
         for(TuningVariables tv: TuningVariables.values()) {
             tv.setToDefaultValue();
         }
     }
+    /** Remove this variable from flash memory */
     void remove(){
         Preferences.remove(name());
     }
+    /** Remove all variables from flash memory */
     static void removeAllKnown() {
         for(TuningVariables tv : TuningVariables.values()) {
             tv.remove();
         }
     }
- 
 }
